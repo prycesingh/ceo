@@ -1,12 +1,32 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+function normalizeOrigin(rawOrigin: string) {
+  try {
+    const url = new URL(rawOrigin);
+    if (url.hostname === "0.0.0.0") {
+      url.hostname = "localhost";
+    }
+    return url.origin;
+  } catch {
+    return rawOrigin;
+  }
+}
+
+function getAppOrigin(req: NextRequest) {
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) {
+    return normalizeOrigin(appUrl.replace(/\/$/, ""));
+  }
+
+  return normalizeOrigin(req.nextUrl.origin);
+}
+
 function getGoogleRedirectUri(req: NextRequest) {
   const explicitUri = process.env.GOOGLE_REDIRECT_URI?.trim();
   if (explicitUri) return explicitUri;
 
-  const appUrl = process.env.APP_URL?.trim().replace(/\/$/, "");
-  const origin = appUrl || req.nextUrl.origin;
+  const origin = getAppOrigin(req);
   return `${origin}/api/auth/google/callback`;
 }
 

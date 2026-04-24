@@ -8,13 +8,37 @@ const courseIds = (process.env.MOODLE_COURSE_IDS ?? "")
   .map((s) => parseInt(s.trim(), 10))
   .filter(Boolean);
 
+function normalizeOrigin(rawOrigin: string) {
+  try {
+    const url = new URL(rawOrigin);
+    if (url.hostname === "0.0.0.0") {
+      url.hostname = "localhost";
+    }
+    return url.origin;
+  } catch {
+    return rawOrigin;
+  }
+}
+
+function getAppOrigin(req: NextRequest) {
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) {
+    return normalizeOrigin(appUrl.replace(/\/$/, ""));
+  }
+
+  return normalizeOrigin(req.nextUrl.origin);
+}
+
 function getGoogleRedirectUri(req: NextRequest) {
   const explicitUri = process.env.GOOGLE_REDIRECT_URI?.trim();
   if (explicitUri) return explicitUri;
 
-  const appUrl = process.env.APP_URL?.trim().replace(/\/$/, "");
-  const origin = appUrl || req.nextUrl.origin;
+  const origin = getAppOrigin(req);
   return `${origin}/api/auth/google/callback`;
+}
+
+function makeAppUrl(path: string, req: NextRequest) {
+  return new URL(path, getAppOrigin(req));
 }
 
 export async function GET(req: NextRequest) {
@@ -25,9 +49,7 @@ export async function GET(req: NextRequest) {
 
   // User denied access
   if (error) {
-    return NextResponse.redirect(
-      new URL("/login?error=google_denied", req.nextUrl),
-    );
+    return NextResponse.redirect(makeAppUrl("/login?error=google_denied", req));
   }
 
   // Verify CSRF state
@@ -36,9 +58,7 @@ export async function GET(req: NextRequest) {
   cookieStore.delete("google_oauth_state");
 
   if (!code || !state || state !== savedState) {
-    return NextResponse.redirect(
-      new URL("/login?error=invalid_state", req.nextUrl),
-    );
+    return NextResponse.redirect(makeAppUrl("/login?error=invalid_state", req));
   }
 
   try {
@@ -58,7 +78,7 @@ export async function GET(req: NextRequest) {
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) {
       return NextResponse.redirect(
-        new URL("/login?error=token_failed", req.nextUrl),
+        makeAppUrl("/login?error=token_failed", req),
       );
     }
 
@@ -73,9 +93,7 @@ export async function GET(req: NextRequest) {
     const { email, given_name, family_name, name } = profile;
 
     if (!email) {
-      return NextResponse.redirect(
-        new URL("/login?error=no_email", req.nextUrl),
-      );
+      return NextResponse.redirect(makeAppUrl("/login?error=no_email", req));
     }
 
     // Find or create Moodle user
@@ -108,11 +126,9 @@ export async function GET(req: NextRequest) {
       email,
     );
 
-    return NextResponse.redirect(new URL("/feed", req.nextUrl));
+    return NextResponse.redirect(makeAppUrl("/feed", req));
   } catch (err) {
     console.error("Google OAuth error:", err);
-    return NextResponse.redirect(
-      new URL("/login?error=oauth_failed", req.nextUrl),
-    );
+    return NextResponse.redirect(makeAppUrl("/login?error=oauth_failed", req));
   }
 }
