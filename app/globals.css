@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-merriweather);
+  --font-display: var(--font-playfair);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Refined editorial palette */
+  --color-cream: #F8F6F1;
+  --color-ink: #111827;
+  --color-ink-muted: #6B7280;
+  --color-ink-light: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-border-strong: #D1D5DB;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Brand — ITBD Blue */
+  --color-brand: #1B4FD8;
+  --color-brand-hover: #1540B5;
+  --color-brand-light: #EEF2FF;
+  --color-brand-dark: #0C2D8A;
+
+  /* Premium accents */
+  --color-navy: #0D1F3C;
+  --color-navy-mid: #172D54;
+  --color-gold: #C4932A;
+  --color-gold-light: #FFFBEB;
+
+  /* Surfaces */
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F9F7F4;
+
+  /* Status */
+  --color-success: #059669;
+  --color-success-light: #D1FAE5;
+  --color-error: #DC2626;
+  --color-error-light: #FEF2F2;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Editorial prose for newsletter content */
+.prose-newsletter {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+}
+
+.prose-newsletter p {
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.prose-newsletter h1,
+.prose-newsletter h2,
+.prose-newsletter h3,
+.prose-newsletter h4 {
+  font-family: var(--font-merriweather), Georgia, serif;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2.25rem;
+  margin-bottom: 1rem;
+  color: var(--color-ink);
+}
+
+.prose-newsletter h1 { font-size: 1.875rem; }
+.prose-newsletter h2 { font-size: 1.5rem; }
+.prose-newsletter h3 { font-size: 1.25rem; }
+
+.prose-newsletter a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-newsletter blockquote {
+  border-left: 3px solid var(--color-brand);
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--color-brand-light);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+}
+
+.prose-newsletter ul,
+.prose-newsletter ol {
+  margin: 1.25rem 0 1.5rem 1.5rem;
+}
+
+.prose-newsletter li {
+  margin-bottom: 0.5rem;
+}
+
+.prose-newsletter img {
+  max-width: 100%;
+  border-radius: 0.75rem;
+  margin: 1.5rem auto;
+}
+
+.prose-newsletter iframe {
+  max-width: 100%;
+  border-radius: 0.75rem;
+}
+
+/* Gradient card header presets */
+.card-cover-1 { background: linear-gradient(135deg, #1B4FD8 0%, #3B82F6 100%); }
+.card-cover-2 { background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%); }
+.card-cover-3 { background: linear-gradient(135deg, #059669 0%, #34D399 100%); }
+.card-cover-4 { background: linear-gradient(135deg, #DC2626 0%, #F87171 100%); }
+.card-cover-5 { background: linear-gradient(135deg, #D97706 0%, #FCD34D 100%); }
+
+/* Smooth focus ring */
+*:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Reading progress bar */
+#reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand) 0%, #60A5FA 100%);
+  z-index: 100;
+  transition: width 0.1s linear;
 }
